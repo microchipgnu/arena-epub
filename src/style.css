@@ -76,6 +76,138 @@ body {
   font-style: italic;
 }
 
+/* ---- Are.na Input ---- */
+.arena-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.arena-input-group label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+}
+
+.input-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.input {
+  flex: 1;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.9rem;
+  padding: 0.75rem 1rem;
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: all 0.2s ease;
+}
+
+.input::placeholder {
+  color: var(--text-muted);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.input-hint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* ---- Channel Info ---- */
+.channel-info {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.channel-info.hidden {
+  display: none;
+}
+
+.channel-meta {
+  flex: 1;
+}
+
+.channel-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 0.25rem;
+  color: var(--text-primary);
+}
+
+.channel-stats {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* ---- Progress Bar ---- */
+.progress-bar {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  height: 2.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-bar.hidden {
+  display: none;
+}
+
+.progress-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent) 0%, var(--success) 100%);
+  transition: width 0.3s ease;
+  opacity: 0.3;
+}
+
+.progress-text {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ---- Footer ---- */
+.footer {
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.footer p {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
 .theme-selector {
   display: flex;
   align-items: center;
@@ -249,8 +381,21 @@ body {
 }
 
 @media (max-width: 600px) {
+  #app {
+    padding: 1rem;
+  }
+  
   .header h1 {
     font-size: 1.8rem;
+  }
+  
+  .input-row {
+    flex-direction: column;
+  }
+  
+  .input-row .btn {
+    width: 100%;
+    justify-content: center;
   }
   
   .theme-selector {
@@ -265,6 +410,7 @@ body {
   
   .controls {
     gap: 0.5rem;
+    flex-wrap: wrap;
   }
   
   .btn {
@@ -274,5 +420,10 @@ body {
   
   .viewer {
     height: 450px;
+  }
+  
+  .channel-info {
+    flex-direction: column;
+    text-align: center;
   }
 }

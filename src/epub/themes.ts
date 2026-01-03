@@ -506,6 +506,458 @@ em {
 }
 `,
   },
+  {
+    id: "zine",
+    name: "Zine",
+    css: `
+/* ========================================
+   ZINE THEME - Raw, punk, collage aesthetic
+   ======================================== */
+
+@page {
+  margin: 0;
+  padding: 0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: #f8f6f1;
+  font-family: "Courier New", Courier, monospace;
+  color: #1a1a1a;
+  overflow-x: hidden;
+}
+
+/* ---- Base zine page ---- */
+.zine-page {
+  width: 100%;
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+  page-break-after: always;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ---- Cover page ---- */
+.zine-page.cover {
+  background: #0a0a0a;
+  color: #f8f6f1;
+  flex-direction: column;
+  text-align: center;
+  padding: 2rem;
+}
+
+.cover-image {
+  position: absolute;
+  inset: 0;
+  opacity: 0.3;
+  overflow: hidden;
+}
+
+.cover-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(100%) contrast(1.2);
+}
+
+.cover-content {
+  position: relative;
+  z-index: 1;
+  padding: 2rem;
+}
+
+.cover-title {
+  font-family: Impact, "Arial Black", sans-serif;
+  font-size: 4rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+  line-height: 0.9;
+  margin: 0 0 1rem;
+  text-shadow: 4px 4px 0 #ff3366;
+}
+
+.cover-author {
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  opacity: 0.7;
+  margin: 0;
+}
+
+/* ---- Full-bleed image page ---- */
+.zine-page.full-bleed {
+  padding: 0;
+  background: #0a0a0a;
+}
+
+.zine-page.full-bleed .image-container {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.zine-page.full-bleed .full-image {
+  max-width: 100%;
+  max-height: 100vh;
+  object-fit: contain;
+}
+
+.zine-page.full-bleed .image-title {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 1.5rem;
+  right: 1.5rem;
+  font-family: "Courier New", monospace;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: #f8f6f1;
+  background: rgba(0,0,0,0.8);
+  padding: 0.5rem 0.75rem;
+  display: inline-block;
+  width: fit-content;
+}
+
+/* Full-bleed variants */
+.zine-page.full-bleed.variant-0 { background: #0a0a0a; }
+.zine-page.full-bleed.variant-1 { 
+  background: #f8f6f1;
+}
+.zine-page.full-bleed.variant-1 .full-image {
+  border: 8px solid #0a0a0a;
+  box-shadow: 12px 12px 0 rgba(0,0,0,0.2);
+  max-width: 85%;
+  max-height: 85vh;
+}
+.zine-page.full-bleed.variant-2 .full-image {
+  filter: grayscale(100%);
+}
+.zine-page.full-bleed.variant-3 .full-image {
+  filter: contrast(1.3) saturate(0.8);
+}
+
+/* ---- Text spread page ---- */
+.zine-page.text-spread {
+  background: #f8f6f1;
+  padding: 3rem 2rem;
+  flex-direction: column;
+}
+
+.zine-page.text-spread .text-container {
+  max-width: 85%;
+  padding: 2rem;
+}
+
+.zine-page.text-spread .spread-text {
+  font-size: 1.6rem;
+  line-height: 1.5;
+  font-weight: 400;
+  margin: 0;
+}
+
+/* Text spread variants */
+.zine-page.text-spread.variant-0 {
+  background: #0a0a0a;
+  color: #f8f6f1;
+}
+.zine-page.text-spread.variant-0 .spread-text {
+  font-family: Impact, "Arial Black", sans-serif;
+  font-size: 2.5rem;
+  text-transform: uppercase;
+  line-height: 1.1;
+}
+
+.zine-page.text-spread.variant-1 {
+  background: #ff3366;
+  color: #0a0a0a;
+}
+.zine-page.text-spread.variant-1 .spread-text {
+  font-family: Georgia, serif;
+  font-style: italic;
+  font-size: 1.8rem;
+}
+
+.zine-page.text-spread.variant-2 {
+  background: repeating-linear-gradient(
+    45deg,
+    #f8f6f1,
+    #f8f6f1 10px,
+    #e8e6e1 10px,
+    #e8e6e1 20px
+  );
+}
+.zine-page.text-spread.variant-2 .text-container {
+  background: #f8f6f1;
+  border: 3px solid #0a0a0a;
+}
+
+.zine-page.text-spread.variant-3 {
+  background: #1a1a2e;
+  color: #eee;
+}
+.zine-page.text-spread.variant-3 .spread-text {
+  font-family: "Courier New", monospace;
+  font-size: 1.2rem;
+  letter-spacing: 0.05em;
+}
+
+.zine-page.text-spread.variant-4 {
+  background: #f0e68c;
+  color: #0a0a0a;
+}
+.zine-page.text-spread.variant-4 .text-container {
+  border-left: 8px solid #0a0a0a;
+  padding-left: 1.5rem;
+}
+
+/* ---- Collage pages ---- */
+.zine-page.collage {
+  background: #f8f6f1;
+  padding: 2rem;
+}
+
+.zine-page.collage .collage-container {
+  position: relative;
+  width: 100%;
+  height: 80vh;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+}
+
+.zine-page.collage .collage-item {
+  position: absolute;
+  transition: transform 0.3s ease;
+}
+
+.zine-page.collage .collage-image {
+  max-width: 45vw;
+  max-height: 40vh;
+  object-fit: cover;
+  border: 4px solid #0a0a0a;
+  box-shadow: 8px 8px 0 rgba(0,0,0,0.15);
+}
+
+/* Collage-2 positions */
+.zine-page.collage-2 .item-0 {
+  top: 10%;
+  left: 5%;
+}
+.zine-page.collage-2 .item-1 {
+  bottom: 10%;
+  right: 5%;
+}
+
+/* Collage-3 positions */
+.zine-page.collage-3 .item-0 {
+  top: 5%;
+  left: 10%;
+}
+.zine-page.collage-3 .item-1 {
+  top: 30%;
+  right: 5%;
+}
+.zine-page.collage-3 .item-2 {
+  bottom: 5%;
+  left: 25%;
+}
+.zine-page.collage-3 .collage-image {
+  max-width: 35vw;
+  max-height: 30vh;
+}
+
+/* Collage variants */
+.zine-page.collage.variant-0 {
+  background: #0a0a0a;
+}
+.zine-page.collage.variant-0 .collage-image {
+  border-color: #f8f6f1;
+}
+
+.zine-page.collage.variant-1 {
+  background: #ff3366;
+}
+.zine-page.collage.variant-1 .collage-image {
+  border-color: #0a0a0a;
+  filter: grayscale(100%);
+}
+
+.zine-page.collage.variant-2 {
+  background: repeating-linear-gradient(
+    -45deg,
+    #f8f6f1,
+    #f8f6f1 20px,
+    #0a0a0a 20px,
+    #0a0a0a 22px
+  );
+}
+
+.zine-page.collage.variant-3 {
+  background: #264653;
+}
+.zine-page.collage.variant-3 .collage-image {
+  border-color: #e9c46a;
+}
+
+/* ---- Mixed page (image + text) ---- */
+.zine-page.mixed {
+  background: #f8f6f1;
+  padding: 2rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  align-items: center;
+}
+
+.zine-page.mixed.image-right {
+  grid-template-columns: 1fr 1fr;
+}
+
+.zine-page.mixed.image-left .mixed-image {
+  order: -1;
+}
+
+.zine-page.mixed .mixed-image img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  border: 4px solid #0a0a0a;
+  box-shadow: 8px 8px 0 rgba(0,0,0,0.15);
+}
+
+.zine-page.mixed .mixed-text {
+  padding: 1rem;
+}
+
+.zine-page.mixed .mixed-text p {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Mixed variants */
+.zine-page.mixed.variant-0 {
+  background: #0a0a0a;
+  color: #f8f6f1;
+}
+.zine-page.mixed.variant-0 .mixed-image img {
+  border-color: #f8f6f1;
+}
+
+.zine-page.mixed.variant-1 {
+  background: #2a9d8f;
+  color: #0a0a0a;
+}
+.zine-page.mixed.variant-1 .mixed-text p {
+  font-family: Georgia, serif;
+  font-style: italic;
+  font-size: 1.3rem;
+}
+
+.zine-page.mixed.variant-2 .mixed-image img {
+  filter: grayscale(100%) contrast(1.2);
+}
+.zine-page.mixed.variant-2 .mixed-text {
+  background: #0a0a0a;
+  color: #f8f6f1;
+  padding: 1.5rem;
+}
+
+.zine-page.mixed.variant-3 {
+  background: #e9c46a;
+}
+.zine-page.mixed.variant-3 .mixed-text p {
+  font-family: Impact, "Arial Black", sans-serif;
+  text-transform: uppercase;
+  font-size: 1.5rem;
+  line-height: 1.2;
+}
+
+/* ---- Divider page ---- */
+.zine-page.divider {
+  background: #0a0a0a;
+  color: #f8f6f1;
+}
+
+.zine-page.divider .divider-content {
+  text-align: center;
+  padding: 2rem;
+}
+
+.zine-page.divider .divider-title {
+  font-family: "Courier New", monospace;
+  font-size: 5rem;
+  font-weight: normal;
+  margin: 0 0 1rem;
+  letter-spacing: 0.2em;
+}
+
+.zine-page.divider .divider-line {
+  width: 100px;
+  height: 4px;
+  background: #ff3366;
+  margin: 0 auto;
+}
+
+/* Divider variants */
+.zine-page.divider.variant-1 {
+  background: #ff3366;
+  color: #0a0a0a;
+}
+.zine-page.divider.variant-1 .divider-line {
+  background: #0a0a0a;
+}
+
+.zine-page.divider.variant-2 {
+  background: repeating-linear-gradient(
+    90deg,
+    #0a0a0a,
+    #0a0a0a 50%,
+    #f8f6f1 50%,
+    #f8f6f1 100%
+  );
+}
+.zine-page.divider.variant-2 .divider-title {
+  background: #0a0a0a;
+  color: #f8f6f1;
+  padding: 1rem 2rem;
+  display: inline-block;
+}
+
+.zine-page.divider.variant-3 {
+  background: #264653;
+}
+.zine-page.divider.variant-3 .divider-line {
+  background: #e9c46a;
+}
+
+/* ---- Utility overrides ---- */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Print optimizations */
+@media print {
+  .zine-page {
+    page-break-after: always;
+    page-break-inside: avoid;
+  }
+}
+`,
+  },
 ];
 
 export function getThemeById(id: string): Theme | undefined {
