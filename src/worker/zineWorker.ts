@@ -6,7 +6,7 @@
 
 // Message types
 export type WorkerMessage = 
-  | { type: "generate"; channelSlug: string }
+  | { type: "generate"; channelSlugs: string[] }
   | { type: "cancel" };
 
 export interface WorkerImageData {
@@ -185,20 +185,45 @@ async function fetchWithTimeout(url: string, timeoutMs: number = 10000): Promise
 }
 
 // Main generation function
-async function generateZine(channelSlug: string): Promise<{ chapters: WorkerChapter[]; images: WorkerImageData[]; title: string; author: string }> {
+async function generateZine(channelSlugs: string[]): Promise<{ chapters: WorkerChapter[]; images: WorkerImageData[]; title: string; author: string }> {
   const postProgress = (percent: number, message: string) => {
     self.postMessage({ type: "progress", percent, message } as WorkerResponse);
   };
 
-  // Fetch channel
-  postProgress(5, "Fetching channel...");
-  const channelRes = await fetchWithTimeout(`https://api.are.na/v2/channels/${channelSlug}?per=50`);
-  if (!channelRes.ok) throw new Error(`Channel not found or private`);
-  const channel: ArenaChannel = await channelRes.json();
+  // Fetch all channels in parallel
+  postProgress(5, `Fetching ${channelSlugs.length} channel${channelSlugs.length > 1 ? "s" : ""}...`);
   
-  // Filter blocks
-  const allBlocks = channel.contents || [];
-  const imageBlocks = allBlocks.filter(b => b.class === "Image" && b.image).slice(0, 15);
+  const channelPromises = channelSlugs.map(async (slug) => {
+    const res = await fetchWithTimeout(`https://api.are.na/v2/channels/${slug}?per=50`);
+    if (!res.ok) throw new Error(`Channel "${slug}" not found or private`);
+    return res.json() as Promise<ArenaChannel>;
+  });
+  
+  const channels = await Promise.all(channelPromises);
+  
+  // Merge blocks from all channels
+  const allBlocks: ArenaBlock[] = [];
+  const authors: string[] = [];
+  const titles: string[] = [];
+  
+  for (const channel of channels) {
+    if (channel.contents) {
+      allBlocks.push(...channel.contents);
+    }
+    titles.push(channel.title);
+    if (channel.user.full_name) {
+      authors.push(channel.user.full_name);
+    }
+  }
+  
+  // Create combined title and author
+  const combinedTitle = titles.length > 1 ? titles.join(" + ") : titles[0] || "Untitled";
+  const uniqueAuthors = [...new Set(authors)];
+  const combinedAuthor = uniqueAuthors.length > 0 ? uniqueAuthors.join(" & ") : "Are.na";
+  
+  // Filter blocks - increase limit for multiple channels
+  const maxImages = Math.min(15 * channelSlugs.length, 30);
+  const imageBlocks = allBlocks.filter(b => b.class === "Image" && b.image).slice(0, maxImages);
   const textBlocks = allBlocks.filter(b => b.class === "Text" && (b.content || b.content_html));
   
   postProgress(10, `Found ${imageBlocks.length} images, ${textBlocks.length} texts`);
@@ -238,8 +263,8 @@ async function generateZine(channelSlug: string): Promise<{ chapters: WorkerChap
   const coverImage = imageBlocks.length > 0 ? imageBlockToFilename.get(imageBlocks[0].id) : undefined;
   console.log("[Worker] Cover image:", coverImage);
   chapters.push({
-    title: channel.title,
-    html: generateCoverPage(channel.title, channel.user.full_name || "Are.na", coverImage),
+    title: combinedTitle,
+    html: generateCoverPage(combinedTitle, combinedAuthor, coverImage),
     images: coverImage ? [coverImage] : [],
   });
   
@@ -345,7 +370,7 @@ async function generateZine(channelSlug: string): Promise<{ chapters: WorkerChap
       case "divider":
         // Only add divider every 6 pages, otherwise consume remaining images
         if (pageIndex > 0 && pageIndex % 6 === 0) {
-          html = generateDividerPage(pickRandom(["· · ·", "※", "—", "◆", channel.title.charAt(0).toUpperCase()]), layoutVariant);
+          html = generateDividerPage(pickRandom(["· · ·", "※", "—", "◆", combinedTitle.charAt(0).toUpperCase()]), layoutVariant);
         } else if (imageIdx < shuffledImages.length) {
           // Fallback to full-bleed if we have remaining images
           const block = shuffledImages[imageIdx++];
@@ -374,7 +399,7 @@ async function generateZine(channelSlug: string): Promise<{ chapters: WorkerChap
   postProgress(90, "Preparing data...");
   
   console.log("[Worker] Returning result...");
-  return { chapters, images, title: channel.title, author: channel.user.full_name || "Are.na" };
+  return { chapters, images, title: combinedTitle, author: combinedAuthor };
 }
 
 // Declare worker scope
@@ -386,8 +411,8 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
   
   if (msg.type === "generate") {
     try {
-      console.log("[Worker] Starting generation for:", msg.channelSlug);
-      const result = await generateZine(msg.channelSlug);
+      console.log("[Worker] Starting generation for:", msg.channelSlugs);
+      const result = await generateZine(msg.channelSlugs);
       console.log("[Worker] Generation complete:", result.chapters.length, "chapters,", result.images.length, "images");
       
       // Don't use transferables - they can cause issues

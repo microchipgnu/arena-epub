@@ -12,24 +12,42 @@ const themeOptions = themes
   .map((t) => `<option value="${t.id}"${t.id === "zine" ? " selected" : ""}>${t.name}</option>`)
   .join("");
 
+// Suggested channels for users to try
+const SUGGESTED_CHANNELS = [
+  { slug: "arena-influences", label: "Arena Influences" },
+  { slug: "creative-coding", label: "Creative Coding" },
+  { slug: "brutalist-websites", label: "Brutalist Websites" },
+  { slug: "ambient", label: "Ambient" },
+];
+
+const suggestedHtml = SUGGESTED_CHANNELS
+  .map(c => `<button class="suggestion-pill" data-slug="${c.slug}">${c.label}</button>`)
+  .join("");
+
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div class="container">
     <header class="header">
       <h1>Are.na → Zine</h1>
-      <p class="subtitle">Turn your Are.na channel into an artsy book</p>
+      <p class="subtitle">Turn your Are.na channels into an artsy book</p>
     </header>
     
     <div class="arena-input-group">
-      <label for="arena-channel">Are.na Channel</label>
+      <label for="arena-channel">Are.na Channels</label>
+      <div id="channel-chips" class="channel-chips"></div>
       <div class="input-row">
         <input 
           type="text" 
           id="arena-channel" 
           class="input" 
-          placeholder="e.g. are.na/username/channel-name or just the-channel-slug"
+          placeholder="Add channel URL or slug..."
         />
+        <button id="add-channel" class="btn btn-small">+ Add</button>
       </div>
-      <p class="input-hint">Paste a channel URL or slug. Must be a public channel.</p>
+      <p class="input-hint">Add one or more public Are.na channels. Press Enter or click Add.</p>
+      <div class="suggested-channels">
+        <span class="suggested-label">Try:</span>
+        ${suggestedHtml}
+      </div>
     </div>
     
     <div id="channel-info" class="channel-info hidden">
@@ -90,15 +108,52 @@ const dl = document.querySelector<HTMLButtonElement>("#dl")!;
 const viewer = document.querySelector<HTMLDivElement>("#viewer")!;
 const themeSelect = document.querySelector<HTMLSelectElement>("#theme-select")!;
 const channelInput = document.querySelector<HTMLInputElement>("#arena-channel")!;
+const addChannelBtn = document.querySelector<HTMLButtonElement>("#add-channel")!;
+const channelChips = document.querySelector<HTMLDivElement>("#channel-chips")!;
 const channelInfo = document.querySelector<HTMLDivElement>("#channel-info")!;
 const progressBar = document.querySelector<HTMLDivElement>("#progress-bar")!;
 const progressFill = progressBar.querySelector<HTMLDivElement>(".progress-fill")!;
 const progressText = progressBar.querySelector<HTMLSpanElement>(".progress-text")!;
+const suggestionPills = document.querySelectorAll<HTMLButtonElement>(".suggestion-pill");
 
 let currentBlob: Blob | null = null;
 let rendition: Rendition | null = null;
-let currentChannelSlug: string | null = null;
+let currentChannelSlugs: string[] = [];
 let worker: Worker | null = null;
+
+// Track added channels
+const addedChannels = new Set<string>();
+
+function renderChips() {
+  channelChips.innerHTML = Array.from(addedChannels)
+    .map(slug => `
+      <div class="channel-chip" data-slug="${slug}">
+        <span class="chip-text">${slug}</span>
+        <button class="chip-remove" data-slug="${slug}" aria-label="Remove ${slug}">×</button>
+      </div>
+    `)
+    .join("");
+  
+  // Add remove listeners
+  channelChips.querySelectorAll<HTMLButtonElement>(".chip-remove").forEach(btn => {
+    btn.onclick = () => {
+      const slug = btn.dataset.slug;
+      if (slug) {
+        addedChannels.delete(slug);
+        renderChips();
+      }
+    };
+  });
+}
+
+function addChannel(input: string) {
+  const slug = parseChannelInput(input.trim());
+  if (slug && !addedChannels.has(slug)) {
+    addedChannels.add(slug);
+    renderChips();
+    channelInput.value = "";
+  }
+}
 
 function showError(message: string) {
   viewer.innerHTML = `<div class="error">${message}</div>`;
@@ -135,18 +190,45 @@ function resetUI() {
   }
 }
 
-// Allow Enter key to start generation
+// Allow Enter key to add channel
 channelInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
-    btn.click();
+    e.preventDefault();
+    const input = channelInput.value.trim();
+    if (input) {
+      addChannel(input);
+    }
   }
+});
+
+// Add channel button
+addChannelBtn.onclick = () => {
+  const input = channelInput.value.trim();
+  if (input) {
+    addChannel(input);
+  }
+};
+
+// Suggestion pills
+suggestionPills.forEach(pill => {
+  pill.onclick = () => {
+    const slug = pill.dataset.slug;
+    if (slug) {
+      addChannel(slug);
+    }
+  };
 });
 
 // Generate zine using Web Worker
 btn.onclick = async () => {
+  // If there's text in the input, add it first
   const input = channelInput.value.trim();
-  if (!input) {
-    showError("Please enter an Are.na channel URL or slug");
+  if (input) {
+    addChannel(input);
+  }
+  
+  if (addedChannels.size === 0) {
+    showError("Please add at least one Are.na channel");
     return;
   }
 
@@ -155,8 +237,8 @@ btn.onclick = async () => {
   hideChannelInfo();
   
   const selectedTheme = getThemeById(themeSelect.value) ?? getDefaultTheme();
-  const channelSlug = parseChannelInput(input);
-  currentChannelSlug = channelSlug;
+  const channelSlugs = Array.from(addedChannels);
+  currentChannelSlugs = channelSlugs;
 
   showProgress(0, "Starting worker...");
   
@@ -267,7 +349,7 @@ btn.onclick = async () => {
   };
   
   // Start the worker
-  const message: WorkerMessage = { type: "generate", channelSlug };
+  const message: WorkerMessage = { type: "generate", channelSlugs };
   worker.postMessage(message);
 };
 
@@ -276,8 +358,8 @@ next.onclick = () => rendition?.next();
 
 dl.onclick = () => {
   if (!currentBlob) return;
-  const filename = currentChannelSlug 
-    ? `${currentChannelSlug}-zine.epub`
+  const filename = currentChannelSlugs.length > 0 
+    ? `${currentChannelSlugs.join("-")}-zine.epub`
     : "demo-zine.epub";
   const url = URL.createObjectURL(currentBlob);
   const a = document.createElement("a");
